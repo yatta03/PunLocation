@@ -1,0 +1,20 @@
+Working on 0 fold
+{'debug': False, 'BPA': True, 'task': 'homo', 'path1_test': 'datasets/subtask1-homographic-test.xml', 'path1_gold': 'datasets/subtask1-homographic-test.gold', 'path2_test': 'datasets/subtask2-homographic-test.xml', 'path2_gold': 'datasets/subtask2-homographic-test.gold', 'emb_file': './embeddings/glove.6B.100d.txt', 'min_word_freq': 1, 'min_char_freq': 1, 'caseless': True, 'expand_vocab': True, 'fold_num': 10, 'use_pos_mask': True, 'use_all_instances': True, 'char_emb_dim': 30, 'word_emb_dim': 100, 'word_rnn_dim': 300, 'char_rnn_dim': 300, 'char_rnn_layers': 1, 'word_rnn_layers': 1, 'highway_layers': 1, 'dropout': 0, 'fine_tune_word_embeddings': False, 'start_epoch': 0, 'batch_size': 15, 'lr': 0.015, 'lr_decay': 0.05, 'momentum': 0.9, 'workers': 1, 'epochs': 50, 'grad_clip': 5.0, 'print_freq': 1, 'checkpoint': None, 'best_f1': -0.1, 'tag_ind': 3, 'b_factor': 0.0, 'p_factor': 0.0, 'opt': 'SGD', 'is_cuda': True, 'device': device(type='cuda')}
+{0: 1, 1: 2, '<pad>': 0, '<end>': 3}
+Embedding length is 100.
+You have elected to include embeddings that are out-of-corpus.
+
+Loading embeddings...
+'word_map' is being updated accordingly.
+
+Done.
+ Embedding vocabulary: 400231
+ Language Model vocabulary: 1848.
+
+{0: 1, 1: 2, 2: 3, '<pad>': 0, '<start>': 4, '<end>': 5}
+lm_f_scores befor:  torch.Size([15, 22, 1848])
+lm_f_scores after:  torch.Size([178, 1848])
+target:  torch.Size([15, 21])
+target:  torch.Size([178])
+tensor([22, 17, 16, 14, 14, 13, 12, 12, 12, 12, 11, 11, 11,  9,  7],
+       device='cuda:0')

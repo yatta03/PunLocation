@@ -28,7 +28,8 @@ class WCDataset(Dataset):
         self.cmap_lengths = cmap_lengths
         self.pos_mask = pos_mask
 
-        self.data_size = self.wmaps.size(0)
+        # self.data_size = self.wmaps.size(0)
+        self.data_size = len(self.wmaps)
 
     def __getitem__(self, i):
         return self.wmaps[i], self.cmaps_f[i], self.cmaps_b[i], self.cmarkers_f[i], self.cmarkers_b[i], self.tmaps[i], \

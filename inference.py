@@ -24,12 +24,15 @@ class ViterbiDecoder():
         word_pad_len = scores.size(1)
 
         # Create a tensor to hold accumulated sequence scores at each current tag
-        scores_upto_t = torch.zeros(batch_size, self.tagset_size)
+        # scores_upto_t = torch.zeros(batch_size, self.tagset_size)
+        scores_upto_t = torch.full((batch_size, self.tagset_size), -float('inf'), device=scores.device)
+        scores_upto_t[:, self.start_tag] = 0
 
         # Create a tensor to hold back-pointers
         # i.e., indices of the previous_tag that corresponds to maximum accumulated score at current tag
         # Let pads be the <end> tag index, since that was the last tag in the decoded sequence
-        backpointers = torch.ones((batch_size, max(lengths), self.tagset_size), dtype=torch.long) * self.end_tag
+        # backpointers = torch.ones((batch_size, max(lengths), self.tagset_size), dtype=torch.long) * self.end_tag
+        backpointers = torch.full((batch_size, max(lengths), self.tagset_size), self.end_tag, dtype=torch.long, device=scores.device)
 
         for t in range(max(lengths)):
             batch_size_t = sum([l > t for l in lengths])  # effective batch size (sans pads) at this timestep
@@ -45,16 +48,19 @@ class ViterbiDecoder():
                     dim=1)  # (batch_size, tagset_size)
 
         # Decode/trace best path backwards
-        decoded = torch.zeros((batch_size, backpointers.size(1)), dtype=torch.long)
-        pointer = torch.ones((batch_size, 1),
-                             dtype=torch.long) * self.end_tag  # the pointers at the ends are all <end> tags
+        # decoded = torch.zeros((batch_size, backpointers.size(1)), dtype=torch.long)
+        # pointer = torch.ones((batch_size, 1),
+        #                      dtype=torch.long) * self.end_tag  # the pointers at the ends are all <end> tags
+        decoded = torch.zeros((batch_size, backpointers.size(1)), dtype=torch.long, device=scores.device)
+        pointer = torch.full((batch_size, 1), self.end_tag, dtype=torch.long, device=scores.device)
 
         for t in list(reversed(range(backpointers.size(1)))):
             decoded[:, t] = torch.gather(backpointers[:, t, :], 1, pointer).squeeze(1)
             pointer = decoded[:, t].unsqueeze(1)  # (batch_size, 1)
 
         # Sanity check
-        assert torch.equal(decoded[:, 0], torch.ones((batch_size), dtype=torch.long) * self.start_tag)
+        # assert torch.equal(decoded[:, 0], torch.ones((batch_size), dtype=torch.long) * self.start_tag)
+        assert torch.all(decoded[:, 0] == self.start_tag)
 
         # Remove the <starts> at the beginning, and append with <ends> (to compare to targets, if any)
         decoded = torch.cat([decoded[:, 1:], torch.ones((batch_size, 1), dtype=torch.long) * self.start_tag],

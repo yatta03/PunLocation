@@ -5,7 +5,7 @@ import os
 import sys
 from models import LM_LSTM_CRF, ViterbiLoss
 from utils import *
-from torch.nn.utils.rnn import pack_padded_sequence
+from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 from datasets import WCDataset
 from inference import ViterbiDecoder
 from sklearn.metrics import f1_score
@@ -43,7 +43,7 @@ def main(fold, task, batch_size, epoch):
 
     # Initialize model or load checkpoint
     if config.checkpoint is not None:
-        checkpoint = torch.load(checkpoint)
+        checkpoint = torch.load(config.checkpoint, map_location=config.device)
         model = checkpoint['model']
         optimizer = checkpoint['optimizer']
         word_map = checkpoint['word_map']
@@ -223,26 +223,27 @@ def train(train_loader, model, lm_criterion, crf_criterion, optimizer, epoch, vb
         lm_lengths = lm_lengths.tolist()
 
         # Remove scores at timesteps we won't predict at
-        # pack_padded_sequence is a good trick to do this (see dynamic_rnn.py, where we explore this)
-        lm_f_scores, _ = pack_padded_sequence(lm_f_scores, lm_lengths, batch_first=True)
-        lm_b_scores, _ = pack_padded_sequence(lm_b_scores, lm_lengths, batch_first=True)
+        # pack_padded_sequence is a good trick to do this (see dynamic_rnn.py, where we explore this)'
+        lm_f_scores = pack_padded_sequence(lm_f_scores, lm_lengths, batch_first=True, enforce_sorted=False)
+        lm_b_scores = pack_padded_sequence(lm_b_scores, lm_lengths, batch_first=True, enforce_sorted=False)
 
         # For the forward sequence, targets are from the second word onwards, up to <end>
         # (timestep -> target) ...dunston -> checks, ...checks -> in, ...in -> <end>
         lm_f_targets = wmaps_sorted[:, 1:]
-        lm_f_targets, _ = pack_padded_sequence(lm_f_targets, lm_lengths, batch_first=True)
-
+        lm_f_targets = pack_padded_sequence(lm_f_targets, lm_lengths, batch_first=True, enforce_sorted=False)
         # For the backward sequence, targets are <end> followed by all words except the last word
         # ...notsnud -> <end>, ...skcehc -> dunston, ...ni -> checks
         lm_b_targets = torch.cat(
             [torch.LongTensor([word_map['<end>']] * wmaps_sorted.size(0)).unsqueeze(1).to(config.device), wmaps_sorted], dim=1)
-        lm_b_targets, _ = pack_padded_sequence(lm_b_targets, lm_lengths, batch_first=True)
+        lm_b_targets = pack_padded_sequence(lm_b_targets, lm_lengths, batch_first=True, enforce_sorted=False)
 
+        # lm_f_scores_unpacked, _ = pad_packed_sequence(lm_f_scores, batch_first=True)
+        # lm_f_targets_unpacked, _= pad_packed_sequence(lm_f_targets, batch_first=True)
         # Calculate loss
-        ce_loss = lm_criterion(lm_f_scores, lm_f_targets) + lm_criterion(lm_b_scores, lm_b_targets)
+        ce_loss = lm_criterion(lm_f_scores.data, lm_f_targets.data) + lm_criterion(lm_b_scores.data, lm_b_targets.data)
         vb_loss = crf_criterion(crf_scores, tmaps_sorted, wmap_lengths_sorted)
 
-       loss = ce_loss + vb_loss
+        loss = ce_loss + vb_loss
 
         # Back prop.
         optimizer.zero_grad()

@@ -37,7 +37,7 @@ class Highway(nn.Module):
         :return: output tensor, with same dimensions as input tensor
         """
         transformed = nn.functional.relu(self.transform[0](x))  # transform input
-        g = nn.functional.sigmoid(self.gate[0](x))  # calculate how much of the transformed input to keep
+        g = torch.sigmoid(self.gate[0](x))  # calculate how much of the transformed input to keep
 
         out = g * transformed + (1 - g) * x  # combine input and transformed input in this ratio
 
@@ -45,7 +45,7 @@ class Highway(nn.Module):
         for i in range(1, self.num_layers):
             out = self.dropout(out)
             transformed = nn.functional.relu(self.transform[i](out))
-            g = nn.functional.sigmoid(self.gate[i](out))
+            g = torch.sigmoid(self.gate[i](out))
 
             out = g * transformed + (1 - g) * out
 
@@ -337,8 +337,8 @@ class ViterbiLoss(nn.Module):
             2)  # (batch_size, word_pad_len)
 
         # Everything is already sorted by lengths
-        scores_at_targets, _ = pack_padded_sequence(scores_at_targets, lengths, batch_first=True)
-        gold_score = scores_at_targets.sum()
+        scores_at_targets = pack_padded_sequence(scores_at_targets, lengths.cpu().to(torch.int64), batch_first=True)
+        gold_score = scores_at_targets.data.sum()
 
         # All paths' scores
 

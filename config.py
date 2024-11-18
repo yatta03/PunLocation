@@ -31,7 +31,7 @@ class Config():
         self.char_rnn_layers = 1  # number of layers in character RNN
         self.word_rnn_layers = 1  # number of layers in word RNN
         self.highway_layers = 1  # number of layers in highway network
-        self.dropout = 0.5  # dropout
+        self.dropout = 0  # dropout (originally it was 0.5, warming was thrown)
         self.fine_tune_word_embeddings = False  # fine-tune pre-trained word embeddings?
 
         # Training parameters
@@ -43,7 +43,7 @@ class Config():
         self.workers = 1  # number of workers for loading data in the DataLoader
         self.epochs = epoch
         self.grad_clip = 5.  # clip gradients at this value
-        self.print_freq = 100  # print training or validation status every __ batches
+        self.print_freq = 1  # print training or validation status every __ batches
         self.checkpoint = None  # path to model checkpoint, None if none
         self.best_f1 = -0.1  # F1 score to start with
         self.tag_ind = 1 if self.task == 'pos' else 3  # choose column in CoNLL 2003 dataset
