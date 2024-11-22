@@ -12,6 +12,7 @@ import math
 import csv
 import os
 import errno
+import random
 
 
 def load_sentences(path1_test, path1_gold, path2_test, path2_gold, use_all_instances=True, isDebug=False):
@@ -68,10 +69,13 @@ def load_sentences(path1_test, path1_gold, path2_test, path2_gold, use_all_insta
 
 
 def map_sentence_to_tag_sequence(all_instances, classes, locations):
+    # random.seed(42)
     sentences = []
     tags = []
     pos_mask = []
 
+    # keys = list(all_instances.keys())
+    # random.shuffle(keys)
     for idx in all_instances.keys():
         sentence = all_instances[idx]
         tag = [0 for s in sentence]
@@ -124,6 +128,21 @@ def get_n_fold_splitting(sentences, tags, pos_mask, fold, fold_num=10):
     return train_sents, train_tags, train_pos_mask, val_sents, val_tags, \
            val_pos_mask, test_sents, test_tags, test_pos_mask
 
+# conbine data of hetero and homo, then shuffle it
+def concat_shuffle(words1, words2, tags1, tags2, pos_mask1, pos_mask2):
+    words = words1 + words2
+    tags = tags1 + tags2
+    pos_mask = pos_mask1 + pos_mask2
+
+    combined_data = list(zip(words, tags, pos_mask))
+    random.shuffle(combined_data)
+
+    words, tags, pos_mask = zip(*combined_data)
+
+    words = list(words)
+    tags = list(tags)
+    pos_mask = list(pos_mask)
+    return words, tags, pos_mask
 
 def read_words_tags(file, tag_ind, caseless=True):
     """

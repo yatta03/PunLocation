@@ -31,14 +31,43 @@ def main(fold, task, batch_size, epoch):
 
     global best_f1, epochs_since_improvement, checkpoint, start_epoch, word_map, char_map, tag_map
     global sentences, tags, pos_mask
-    sentences, tags, pos_mask = load_sentences(config.path1_test, config.path1_gold, config.path2_test, config.path2_gold,
+    train_words, train_tags, train_pos_mask, val_words, val_tags, val_pos_mask, test_words, test_tags, test_pos_mask = [],[],[],[],[],[],[],[],[]
+    if task == "all":
+        # load hetero
+        sentences1, tags1, pos_mask1 = load_sentences("datasets/subtask1-heterographic-test.xml", "datasets/subtask1-heterographic-test.gold",
+                                                        "datasets/subtask2-heterographic-test.xml", "datasets/subtask2-heterographic-test.gold",
+                                                        config.use_all_instances, isDebug=config.debug)
+        train_words1, train_tags1, train_pos_mask1, \
+        val_words1, val_tags1, val_pos_mask1,\
+        test_words1, test_tags1, test_pos_mask1\
+            = get_n_fold_splitting(sentences1, tags1, pos_mask1, fold, fold_num)
+        
+        # load homo
+        sentences2, tags2, pos_mask2 = load_sentences("datasets/subtask1-homographic-test.xml", "datasets/subtask1-homographic-test.gold",
+                                                        "datasets/subtask2-homographic-test.xml", "datasets/subtask2-homographic-test.gold",
+                                                        config.use_all_instances, isDebug=config.debug)
+        train_words2, train_tags2, train_pos_mask2, \
+        val_words2, val_tags2, val_pos_mask2,\
+        test_words2, test_tags2, test_pos_mask2\
+            = get_n_fold_splitting(sentences2, tags2, pos_mask2, fold, fold_num)
+
+        # concat
+        sentences = sentences1 + sentences2
+        tags = tags1 + tags2
+        pos_mask = pos_mask1 + pos_mask2
+
+        train_words, train_tags, train_pos_mask = concat_shuffle(train_words1, train_words2, train_tags1, train_tags2, train_pos_mask1, train_pos_mask2)
+        val_words, val_tags, val_pos_mask = concat_shuffle(val_words1, val_words2, val_tags1, val_tags2, val_pos_mask1, val_pos_mask2)
+        test_words, test_tags, test_pos_mask = concat_shuffle(test_words1, test_words2, test_tags1, test_tags2, test_pos_mask1, test_pos_mask2)
+    else:
+        sentences, tags, pos_mask = load_sentences(config.path1_test, config.path1_gold, config.path2_test, config.path2_gold,
                                                config.use_all_instances, isDebug=config.debug)
 
-    # Read training and validation data
-    train_words, train_tags, train_pos_mask, \
-    val_words, val_tags, val_pos_mask,\
-    test_words, test_tags, test_pos_mask\
-        = get_n_fold_splitting(sentences, tags, pos_mask, fold, fold_num)
+        # Read training and validation data
+        train_words, train_tags, train_pos_mask, \
+        val_words, val_tags, val_pos_mask,\
+        test_words, test_tags, test_pos_mask\
+            = get_n_fold_splitting(sentences, tags, pos_mask, fold, fold_num)
     best_f1 = -0.1  # F1 score to start with
 
     # Initialize model or load checkpoint

@@ -215,8 +215,8 @@ class LM_LSTM_CRF(nn.Module):
 
         # Pack padded sequence
         cf = pack_padded_sequence(cf, cmap_lengths.tolist(),
-                                  batch_first=True)  # packed sequence of char_emb_dim, with real sequence lengths
-        cb = pack_padded_sequence(cb, cmap_lengths.tolist(), batch_first=True)
+                                  batch_first=True, enforce_sorted=False)  # packed sequence of char_emb_dim, with real sequence lengths
+        cb = pack_padded_sequence(cb, cmap_lengths.tolist(), batch_first=True, enforce_sorted=False)
 
         # LSTM
         cf, _ = self.forw_char_lstm(cf)  # packed sequence of char_rnn_dim, with real sequence lengths
@@ -234,6 +234,8 @@ class LM_LSTM_CRF(nn.Module):
         cmarkers_b = cmarkers_b.unsqueeze(2).expand(self.batch_size, self.word_pad_len, self.char_rnn_dim)
         cf_selected = torch.gather(cf, 1, cmarkers_f)  # (batch_size, word_pad_len, char_rnn_dim)
         cb_selected = torch.gather(cb, 1, cmarkers_b)
+        cf_selected = cf_selected.to(self.device)
+        cb_selected = cb_selected.to(self.device)
 
         # Only for co-training, not useful for tagging after model is trained
         if self.training:
@@ -273,7 +275,7 @@ class LM_LSTM_CRF(nn.Module):
 
         # Pack padded sequence
         w = pack_padded_sequence(w, list(wmap_lengths),
-                                 batch_first=True)  # packed sequence of word_emb_dim + 2 * char_rnn_dim, with real sequence lengths
+                                 batch_first=True, enforce_sorted=False)  # packed sequence of word_emb_dim + 2 * char_rnn_dim, with real sequence lengths
 
         # LSTM
         w, _ = self.word_blstm(w)  # packed sequence of word_rnn_dim, with real sequence lengths
@@ -337,7 +339,7 @@ class ViterbiLoss(nn.Module):
             2)  # (batch_size, word_pad_len)
 
         # Everything is already sorted by lengths
-        scores_at_targets = pack_padded_sequence(scores_at_targets, lengths.cpu().to(torch.int64), batch_first=True)
+        scores_at_targets = pack_padded_sequence(scores_at_targets, lengths.cpu().to(torch.int64), batch_first=True, enforce_sorted=False)
         gold_score = scores_at_targets.data.sum()
 
         # All paths' scores
