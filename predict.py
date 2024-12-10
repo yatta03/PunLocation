@@ -121,7 +121,7 @@ def eval(test_loader, model, crf_criterion, vb_decoder, tag_map, config):
                 result_is_pun = True
                 # false_pos += 1
             # print("prediction loc: ", np.where(pred == pun_tag_id)[0])
-            result_pun_loc = np.where(pred == pun_tag_id)[0][0]
+            result_pun_loc = np.where(pred == pun_tag_id)[0]
             if is_pun:
                 # loc_total += 1
                 idx = np.where(gold == pun_tag_id)
@@ -267,4 +267,4 @@ is_pun, pun_loc = eval(test_loader=test_loader,
                         vb_decoder=vb_decoder,
                         tag_map=tag_map, config=config)
 print(f"\nresult: \n{'pun' if is_pun else 'not pun'}")
-print(f"pun location: {pun_loc}, word: {test_in[0][pun_loc]}")
+print(f"pun location: {pun_loc}, word: {[test_in[0][i] for i in pun_loc]}")

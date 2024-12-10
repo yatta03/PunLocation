@@ -49,8 +49,10 @@ pred
 
 result:
 pun
-pun location: 12, word: ground
+pun location: [12], word: [ground]
 ```
+
+examples can be found in [here (google colab)](https://colab.research.google.com/drive/1vfFjCdMtODL-ZmtpHksPMLTu9LoD8BYh?usp=sharing)
 
 ## Joint Detection and Location of English Puns
 
