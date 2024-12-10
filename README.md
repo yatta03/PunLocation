@@ -10,6 +10,48 @@ python: 3.11
 colab: [test1](https://colab.research.google.com/drive/1zjA7UTHwZlfta1NipE5aC4hZoo-Qr0LW?usp=sharing)  
 (result: all.log, pun_visualize.ipynb)
 
+### test
+
+for using the model on given pun, just run
+
+```
+python3 ./predict.py --fold <fold number> --input <your pun>
+```
+
+- `--fold`: specifies the model trained in which fold is going to be used (model/BEST_all_fold{fold}...)
+- `--input`: the pun to be tested. note that all puntuation need to be seperated by white space
+
+for example:
+
+```
+python3 ./predict.py --fold 1 --input "Did you hear about that great new shovel ? It ’ s ground breaking ."
+```
+
+the output consists of the following parts:
+
+parsed input:
+
+```
+{0: 1, 1: 2, '<pad>': 0, '<end>': 3}
+
+test:  [['Did', 'you', 'hear', 'about', 'that', 'great', 'new', 'shovel', '?', 'It', '’', 's', 'ground', 'breaking', '.']]
+test_tags:  [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+test_post_mask:  [[0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1]]
+```
+
+the prediction tag for each word, and the prediction result:
+
+```
+{0: 1, 1: 2, 2: 3, '<pad>': 0, '<start>': 4, '<end>': 5}
+
+pred
+ tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 3, 4]])
+
+result:
+pun
+pun location: 12, word: ground
+```
+
 ## Joint Detection and Location of English Puns
 
 Code for the NAACL-19 paper: Joint Detection and Location of English Puns.
