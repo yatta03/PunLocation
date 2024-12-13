@@ -229,7 +229,7 @@ fold = args.fold
 
 test_in_tag = [[0 for _ in test_in[0]]]
 test_in_pos_mask = [[1 if i >= len(test_in[0])//2 else 0 for i, _ in enumerate(test_in[0])]]
-test_inputs = create_input_tensors(test_in,test_in_tag, temp_word_map, char_map, tag_map, test_in_pos_mask, mask_map)
+test_inputs = create_input_tensors(test_in,test_in_tag, word_map, char_map, tag_map, test_in_pos_mask, mask_map)
 test_loader = torch.utils.data.DataLoader(WCDataset(*test_inputs), batch_size=config.batch_size, shuffle=True,
                                              num_workers=config.workers, pin_memory=False)
 

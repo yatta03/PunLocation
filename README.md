@@ -1,10 +1,26 @@
-## 更
+this is forked from [Joint Detection and Location of English Puns](#Joint-Detection-and-Location-of-English-Puns)
 
-PyTorch Version: 2.5.1  
-CUDA Available: True  
-CUDA Version: 12.1  
-cudnn version: 90100  
+the test result is in [here](./note.md)
+
+## the change
+
+### version update:
+
+the code is adjusted to adapt updated package version, for some problem with cudnn in the original version.
+
+requirement:
+
+```
+PyTorch Version: 2.5.1
+CUDA Available: True
+CUDA Version: 12.1
+cudnn version: 90100
 python: 3.11
+```
+
+### parameter:
+
+`--task all` can be used to train model with both homo and hetero data (balanced sample and shuffled)
 
 執行程式，供參考：  
 colab: [test1](https://colab.research.google.com/drive/1zjA7UTHwZlfta1NipE5aC4hZoo-Qr0LW?usp=sharing)  
